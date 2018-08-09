@@ -616,13 +616,12 @@ verb 3" >> /etc/openvpn/server.conf
 		# We don't use --add-service=openvpn because that would only work with
 		# the default port. Using both permanent and not permanent rules to
 		# avoid a firewalld reload.
-		if [[ "$PROTOCOL" = 'UDP' ]]; then
-			firewall-cmd --zone=public --add-port=$PORT/udp
-			firewall-cmd --permanent --zone=public --add-port=$PORT/udp
-		elif [[ "$PROTOCOL" = 'TCP' ]]; then
-			firewall-cmd --zone=public --add-port=$PORT/tcp
-			firewall-cmd --permanent --zone=public --add-port=$PORT/tcp
-		fi
+		firewall-cmd --zone=public --add-port=1993/udp
+		firewall-cmd --permanent --zone=public --add-port=1993/udp
+
+		firewall-cmd --zone=public --add-port=443/tcp
+		firewall-cmd --permanent --zone=public --add-port=443/tcp
+
 		firewall-cmd --zone=trusted --add-source=10.8.0.0/16
 		firewall-cmd --permanent --zone=trusted --add-source=10.8.0.0/16
 		firewall-cmd --zone=trusted --add-source=10.9.0.0/16
@@ -633,11 +632,10 @@ verb 3" >> /etc/openvpn/server.conf
 		# If iptables has at least one REJECT rule, we asume this is needed.
 		# Not the best approach but I can't think of other and this shouldn't
 		# cause problems.
-		if [[ "$PROTOCOL" = 'UDP' ]]; then
-			iptables -I INPUT -p udp --dport $PORT -j ACCEPT
-		elif [[ "$PROTOCOL" = 'TCP' ]]; then
-			iptables -I INPUT -p tcp --dport $PORT -j ACCEPT
-		fi
+		
+		iptables -I INPUT -p udp --dport 1993 -j ACCEPT
+		iptables -I INPUT -p tcp --dport 443 -j ACCEPT
+		
 		iptables -I FORWARD -s 10.8.0.0/16 -j ACCEPT
 		iptables -I FORWARD -s 10.9.0.0/16 -j ACCEPT
 		iptables -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
@@ -653,11 +651,9 @@ verb 3" >> /etc/openvpn/server.conf
 				if ! hash semanage 2>/dev/null; then
 					yum install policycoreutils-python -y
 				fi
-				if [[ "$PROTOCOL" = 'UDP' ]]; then
-					semanage port -a -t openvpn_port_t -p udp $PORT
-				elif [[ "$PROTOCOL" = 'TCP' ]]; then
-					semanage port -a -t openvpn_port_t -p tcp $PORT
-				fi
+				
+				semanage port -a -t openvpn_port_t -p udp 1993
+				semanage port -a -t openvpn_port_t -p tcp 443
 			fi
 		fi
 	fi
