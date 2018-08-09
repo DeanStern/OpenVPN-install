@@ -669,7 +669,7 @@ verb 3" >> /etc/openvpn/server.conf
 				#Workaround to fix OpenVPN service on OpenVZ
 				sed -i 's|LimitNPROC|#LimitNPROC|' /lib/systemd/system/openvpn\@.service
 				sed -i 's|/etc/openvpn/server|/etc/openvpn|' /lib/systemd/system/openvpn\@.service
-				sed -i 's|%i.conf|server.conf|' /lib/systemd/system/openvpn\@.service
+				sed -i 's|%i.conf|' /lib/systemd/system/openvpn\@.service
 				systemctl daemon-reload
 				systemctl restart openvpn
 				systemctl enable openvpn
@@ -681,7 +681,7 @@ verb 3" >> /etc/openvpn/server.conf
 			if [[ "$OS" = 'arch' || "$OS" = 'fedora' ]]; then
 				#Workaround to avoid rewriting the entire script for Arch & Fedora
 				sed -i 's|/etc/openvpn/server|/etc/openvpn|' /usr/lib/systemd/system/openvpn-server@.service
-				sed -i 's|%i.conf|server.conf|' /usr/lib/systemd/system/openvpn-server@.service
+				sed -i 's|%i.conf|' /usr/lib/systemd/system/openvpn-server@.service
 				systemctl daemon-reload
 				systemctl restart openvpn-server@openvpn.service
 				systemctl enable openvpn-server@openvpn.service
