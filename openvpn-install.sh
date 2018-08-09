@@ -170,9 +170,11 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 				if pgrep firewalld; then
 					# Using both permanent and not permanent rules to avoid a firewalld reload.
 					firewall-cmd --zone=public --remove-port=$PORT/udp
-					firewall-cmd --zone=trusted --remove-source=10.8.0.0/24
+					firewall-cmd --zone=trusted --remove-source=10.8.0.0/16
+					firewall-cmd --zone=trusted --remove-source=10.9.0.0/16
 					firewall-cmd --permanent --zone=public --remove-port=$PORT/udp
-					firewall-cmd --permanent --zone=trusted --remove-source=10.8.0.0/24
+					firewall-cmd --permanent --zone=trusted --remove-source=10.8.0.0/16
+					firewall-cmd --permanent --zone=trusted --remove-source=10.9.0.0/16
 				fi
 				if iptables -L -n | grep -qE 'REJECT|DROP'; then
 					if [[ "$PROTOCOL" = 'udp' ]]; then
@@ -180,10 +182,11 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 					else
 						iptables -D INPUT -p tcp --dport $PORT -j ACCEPT
 					fi
-					iptables -D FORWARD -s 10.8.0.0/24 -j ACCEPT
+					iptables -D FORWARD -s 10.8.0.0/16 -j ACCEPT
 					iptables-save > $IPTABLES
 				fi
-				iptables -t nat -D POSTROUTING -o $NIC -s 10.8.0.0/24 -j MASQUERADE
+				iptables -t nat -D POSTROUTING -o $NIC -s 10.8.0.0/16 -j MASQUERADE
+				iptables -t nat -D POSTROUTING -o $NIC -s 10.9.0.0/16 -j MASQUERADE
 				iptables-save > $IPTABLES
 				if hash sestatus 2>/dev/null; then
 					if sestatus | grep "Current mode" | grep -qs "enforcing"; then
@@ -523,7 +526,7 @@ persist-key
 persist-tun
 keepalive 10 120
 topology subnet
-server 10.8.0.0 255.255.255.0
+server 10.8.0.0 255.255.0.0
 ifconfig-pool-persist ipp.txt" >> /etc/openvpn/server.conf
 	# DNS resolvers
 	case $DNS in
@@ -603,7 +606,8 @@ verb 3" >> /etc/openvpn/server.conf
 	echo 1 > /proc/sys/net/ipv4/ip_forward
 
 	# Set NAT for the VPN subnet
-	iptables -t nat -A POSTROUTING -o $NIC -s 10.8.0.0/24 -j MASQUERADE
+	iptables -t nat -A POSTROUTING -o $NIC -s 10.8.0.0/16 -j MASQUERADE
+	iptables -t nat -A POSTROUTING -o $NIC -s 10.9.0.0/16 -j MASQUERADE
 
 	# Save persitent iptables rules
 	iptables-save > $IPTABLES
@@ -619,8 +623,10 @@ verb 3" >> /etc/openvpn/server.conf
 			firewall-cmd --zone=public --add-port=$PORT/tcp
 			firewall-cmd --permanent --zone=public --add-port=$PORT/tcp
 		fi
-		firewall-cmd --zone=trusted --add-source=10.8.0.0/24
-		firewall-cmd --permanent --zone=trusted --add-source=10.8.0.0/24
+		firewall-cmd --zone=trusted --add-source=10.8.0.0/16
+		firewall-cmd --permanent --zone=trusted --add-source=10.8.0.0/16
+		firewall-cmd --zone=trusted --add-source=10.9.0.0/16
+		firewall-cmd --permanent --zone=trusted --add-source=10.9.0.0/16
 	fi
 
 	if iptables -L -n | grep -qE 'REJECT|DROP'; then
@@ -632,7 +638,8 @@ verb 3" >> /etc/openvpn/server.conf
 		elif [[ "$PROTOCOL" = 'TCP' ]]; then
 			iptables -I INPUT -p tcp --dport $PORT -j ACCEPT
 		fi
-		iptables -I FORWARD -s 10.8.0.0/24 -j ACCEPT
+		iptables -I FORWARD -s 10.8.0.0/16 -j ACCEPT
+		iptables -I FORWARD -s 10.9.0.0/16 -j ACCEPT
 		iptables -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 		# Save persitent OpenVPN rules
 		iptables-save > $IPTABLES
