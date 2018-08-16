@@ -234,6 +234,11 @@ else
 	echo "If your server is running behind a NAT, (e.g. LowEndSpirit, Scaleway) leave the IP address as it is. (local/private IP)"
 	echo "Otherwise, it should be your public IPv4 address."
 
+    # Read server name
+    echo ""
+    echo "What the name of the current server?"
+    read -rp "Server name: " -e -i ServerName SERVER_NICK_NAME
+
 	# Autodetect IP address and pre-fill for the user
 	IP=$(ip addr | grep 'inet' | grep -v inet6 | grep -vE '127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | head -1)
 	read -rp "IP address: " -e -i $IP IP
@@ -722,10 +727,112 @@ verb 3" >> /etc/openvpn/client-template.txt
 
 	# Generate the custom client.ovpn
 	newclient "$CLIENT"
-	echo ""
-	echo "Finished!"
-	echo ""
 	echo "Your client config is available at $homeDir/$CLIENT.ovpn"
 	echo "If you want to add more clients, you simply need to run this script another time!"
 fi
+
+echo ""
+echo "Configuring new server.conf and server-tcp.conf"
+echo ""
+echo "Backup current server.conf"
+mv /etc/openvpn/server.conf /etc/openvpn/server.conf.backup
+
+echo 'port 1194
+proto udp
+dev tun
+persist-key
+persist-tun
+persist-remote-ip
+keepalive 10 120
+topology subnet
+server 10.8.0.0 255.255.255.0
+ifconfig-pool-persist ipp.txt
+push "dhcp-option DNS 8.8.8.8"
+push "dhcp-option DNS 8.8.4.4"
+push "redirect-gateway def1 bypass-dhcp"
+ca ca.crt
+cert $SERVER_NAME.crt
+key $SERVER_NAME.key
+dh dh.pem
+comp-lzo no
+cipher AES-128-CBC
+status openvpn.log 5
+verb 3
+plugin /usr/lib64/openvpn/plugins/openvpn-plugin-auth-pam.so /etc/pam.d/login
+client-cert-not-required
+verify-client-cert none
+username-as-common-name
+duplicate-cn
+status-version 2
+tun-mtu 1400
+mssfix 1360' >> /etc/openvpn/server.conf
+
+echo 'port 443
+proto tcp
+dev tun
+persist-key
+persist-tun
+persist-remote-ip
+keepalive 10 120
+topology subnet
+server 10.8.0.0 255.255.255.0
+ifconfig-pool-persist ipp.txt
+push "dhcp-option DNS 8.8.8.8"
+push "dhcp-option DNS 8.8.4.4"
+push "redirect-gateway def1 bypass-dhcp"
+ca ca.crt
+cert server_5fafgkOEJoMJZiUx.crt
+key server_5fafgkOEJoMJZiUx.key
+dh dh.pem
+comp-lzo no
+cipher AES-128-CBC
+status openvpn-tcp.log 5
+verb 3
+plugin /usr/lib64/openvpn/plugins/openvpn-plugin-auth-pam.so /etc/pam.d/login
+client-cert-not-required
+verify-client-cert none
+username-as-common-name
+duplicate-cn
+status-version 2
+tun-mtu 1400
+mssfix 1360' >> /etc/openvpn/server-tcp.conf
+
+echo ""
+echo "Creating users..."
+echo ""
+echo "Creating trial user"
+echo "trialUser:tewr9nA2itRA" | chpasswd
+echo "Creating premium user"
+echo "vpnuser:tewr9nA2itRA" | chpasswd
+echo ""
+
+echo ""
+echo "Restarting services"
+service openvpn@server restart
+service openvpn@server-tcp restart
+echo ""
+
+echo ""
+echo "Preparing logs uploader"
+echo ""
+mkdir /root/openVPN
+echo '#!/bin/sh
+rm -rf /root/openVPN/*
+
+cat /etc/openvpn/openvpn.log | grep "CLIENT_LIST,trialUser" | awk 'END{ print  "$SERVER_NICK_NAME Trial",NR }' >> /root/openVPN/OpenVPNUsers.log
+cat /etc/openvpn/openvpn.log | grep "CLIENT_LIST,vpnuser" | awk 'END{ print  "$SERVER_NICK_NAME",NR }' >> /root/openVPN/OpenVPNUsers.log
+
+cat /etc/openvpn/openvpn.log | grep "CLIENT_LIST,trialUser" | awk -F',' -v now=`date +%s` '{print "$SERVER_NICK_NAME Trial",$3,$6,$7,now-$9}' >> /root/openVPN/OpenVPN.log
+cat /etc/openvpn/openvpn.log | grep "CLIENT_LIST,vpnuser" | awk -F',' -v now=`date +%s` '{print "$SERVER_NICK_NAME",$3,$6,$7,now-$9}' >> /root/openVPN/OpenVPN.log
+
+/bin/curl -T /root/openVPN/OpenVPNUsers.log http://listener.logz.io:8021/file_upload/ejNwBdrgIBaYdIxxOfigFcjfzlbnNoeD/OpenVPNConnectedUsers
+/bin/curl -T /root/openVPN/OpenVPN.log http://listener.logz.io:8021/file_upload/ejNwBdrgIBaYdIxxOfigFcjfzlbnNoeD/OpenVPNStats' >> /root/uploader.sh
+chmod +x /root/uploader.sh
+
+echo '*/5  *  *  *  * root  /root/uploader.sh' >> /etc/crontab
+sudo systemctl restart crond
+
+echo ""
+echo "Finished!"
+echo ""
 exit 0;
