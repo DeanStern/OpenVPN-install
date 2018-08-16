@@ -745,15 +745,15 @@ persist-tun
 persist-remote-ip
 keepalive 10 120
 topology subnet
-server 10.8.0.0 255.255.255.0
+server 10.8.0.0 255.255.0.0
 ifconfig-pool-persist ipp.txt
 push "dhcp-option DNS 8.8.8.8"
 push "dhcp-option DNS 8.8.4.4"
 push "redirect-gateway def1 bypass-dhcp"
-ca ca.crt
-cert $SERVER_NAME.crt
-key $SERVER_NAME.key
-dh dh.pem
+ca ca.crt' >> /etc/openvpn/server.conf
+echo "cert $SERVER_NAME.crt
+key $SERVER_NAME.key" >> /etc/openvpn/server.conf
+echo "dh dh.pem
 comp-lzo no
 cipher AES-128-CBC
 status openvpn.log 5
@@ -765,7 +765,7 @@ username-as-common-name
 duplicate-cn
 status-version 2
 tun-mtu 1400
-mssfix 1360' >> /etc/openvpn/server.conf
+mssfix 1360" >> /etc/openvpn/server.conf
 
 echo 'port 443
 proto tcp
@@ -775,15 +775,15 @@ persist-tun
 persist-remote-ip
 keepalive 10 120
 topology subnet
-server 10.8.0.0 255.255.255.0
+server 10.8.0.0 255.255.0.0
 ifconfig-pool-persist ipp.txt
 push "dhcp-option DNS 8.8.8.8"
 push "dhcp-option DNS 8.8.4.4"
 push "redirect-gateway def1 bypass-dhcp"
-ca ca.crt
-cert server_5fafgkOEJoMJZiUx.crt
-key server_5fafgkOEJoMJZiUx.key
-dh dh.pem
+ca ca.crt'
+echo "cert $SERVER_NAME.crt
+key $SERVER_NAME.key" >> /etc/openvpn/server-tcp.conf
+echo "dh dh.pem
 comp-lzo no
 cipher AES-128-CBC
 status openvpn-tcp.log 5
@@ -795,14 +795,16 @@ username-as-common-name
 duplicate-cn
 status-version 2
 tun-mtu 1400
-mssfix 1360' >> /etc/openvpn/server-tcp.conf
+mssfix 1360" >> /etc/openvpn/server-tcp.conf
 
 echo ""
 echo "Creating users..."
 echo ""
 echo "Creating trial user"
+adduser trialUser
 echo "trialUser:tewr9nA2itRA" | chpasswd
 echo "Creating premium user"
+adduser vpnuser
 echo "vpnuser:tewr9nA2itRA" | chpasswd
 echo ""
 
