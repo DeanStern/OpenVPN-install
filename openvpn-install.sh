@@ -270,7 +270,7 @@ else
 	echo "   8) Yandex Basic (Russia)"
 	echo "   9) AdGuard DNS (Russia)"
 	until [[ "$DNS" =~ ^[0-9]+$ ]] && [ "$DNS" -ge 1 -a "$DNS" -le 9 ]; do
-		read -rp "DNS [1-9]: " -e -i 1 DNS
+		read -rp "DNS [1-9]: " -e -i 7 DNS
 	done
 	echo ""
 	echo "See https://github.com/Angristan/OpenVPN-install#encryption to learn more about "
@@ -775,12 +775,12 @@ persist-tun
 persist-remote-ip
 keepalive 10 120
 topology subnet
-server 10.8.0.0 255.255.0.0
+server 10.9.0.0 255.255.0.0
 ifconfig-pool-persist ipp.txt
 push "dhcp-option DNS 8.8.8.8"
 push "dhcp-option DNS 8.8.4.4"
 push "redirect-gateway def1 bypass-dhcp"
-ca ca.crt'
+ca ca.crt' >> /etc/openvpn/server-tcp.conf
 echo "cert $SERVER_NAME.crt
 key $SERVER_NAME.key" >> /etc/openvpn/server-tcp.conf
 echo "dh dh.pem
@@ -844,7 +844,7 @@ cat /etc/openvpn/openvpn.log | grep "CLIENT_LIST,trialUser" | awk -F',' -v now=`
 cat /etc/openvpn/openvpn.log | grep "CLIENT_LIST,vpnuser" | awk -F',' -v now=`date +%s` '{print "$SERVER_NICK_NAME",$3,$6,$7,now-$9}' >> /root/openVPN/OpenVPN.log
 
 /bin/curl -T /root/openVPN-udp/OpenVPNUsers.log http://listener.logz.io:8021/file_upload/ejNwBdrgIBaYdIxxOfigFcjfzlbnNoeD/OpenVPNConnectedUsers
-/bin/curl -T /root/openVPN-udp/OpenVPN.log http://listener.logz.io:8021/file_upload/ejNwBdrgIBaYdIxxOfigFcjfzlbnNoeD/OpenVPNStats' >> /root/uploader.sh
+/bin/curl -T /root/openVPN-udp/OpenVPN.log http://listener.logz.io:8021/file_upload/ejNwBdrgIBaYdIxxOfigFcjfzlbnNoeD/OpenVPNStats' >> /root/uploader-udp.sh
 chmod +x /root/uploader-udp.sh
 
 echo '*/5  *  *  *  * root  /root/uploader.sh' >> /etc/crontab
