@@ -819,32 +819,32 @@ echo "Preparing logs uploader"
 echo ""
 mkdir /root/openVPN
 mkdir /root/openVPN-udp
-echo '#!/bin/sh
+echo "#!/bin/sh
 rm -rf /root/openVPN/*
 
-cat /etc/openvpn/openvpn-tcp.log | grep "CLIENT_LIST,trialUser" | awk 'END{ print  "$SERVER_NICK_NAME Trial",NR }' >> /root/openVPN/OpenVPNUsers.log
-cat /etc/openvpn/openvpn-tcp.log | grep "CLIENT_LIST,vpnuser" | awk 'END{ print  "$SERVER_NICK_NAME",NR }' >> /root/openVPN/OpenVPNUsers.log
+cat /etc/openvpn/openvpn-tcp.log | grep "CLIENT_LIST,trialUser" | awk 'END{ print \"$SERVER_NICK_NAME Trial\",NR }' >> /root/openVPN/OpenVPNUsers.log
+cat /etc/openvpn/openvpn-tcp.log | grep "CLIENT_LIST,vpnuser" | awk 'END{ print \"$SERVER_NICK_NAME\",NR }' >> /root/openVPN/OpenVPNUsers.log
 
-cat /etc/openvpn/openvpn-tcp.log | grep "CLIENT_LIST,trialUser" | awk -F',' -v now=`date +%s` '{print "$SERVER_NICK_NAME Trial",$3,$6,$7,now-$9}' >> /root/openVPN/OpenVPN.log
-cat /etc/openvpn/openvpn-tcp.log | grep "CLIENT_LIST,vpnuser" | awk -F',' -v now=`date +%s` '{print "$SERVER_NICK_NAME",$3,$6,$7,now-$9}' >> /root/openVPN/OpenVPN.log
+cat /etc/openvpn/openvpn-tcp.log | grep "CLIENT_LIST,trialUser" | awk -F',' -v now=`date +%s` '{print \"$SERVER_NICK_NAME Trial\",$3,$6,$7,now-$9}' >> /root/openVPN/OpenVPN.log
+cat /etc/openvpn/openvpn-tcp.log | grep "CLIENT_LIST,vpnuser" | awk -F',' -v now=`date +%s` '{print \"$SERVER_NICK_NAME\",$3,$6,$7,now-$9}' >> /root/openVPN/OpenVPN.log
 
 /bin/curl -T /root/openVPN/OpenVPNUsers.log http://listener.logz.io:8021/file_upload/ejNwBdrgIBaYdIxxOfigFcjfzlbnNoeD/OpenVPNConnectedUsers
-/bin/curl -T /root/openVPN/OpenVPN.log http://listener.logz.io:8021/file_upload/ejNwBdrgIBaYdIxxOfigFcjfzlbnNoeD/OpenVPNStats' >> /root/uploader.sh
+/bin/curl -T /root/openVPN/OpenVPN.log http://listener.logz.io:8021/file_upload/ejNwBdrgIBaYdIxxOfigFcjfzlbnNoeD/OpenVPNStats" >> /root/uploader.sh
 chmod +x /root/uploader.sh
 
 SERVER_NICK_NAME+=UDP
 
-echo '#!/bin/sh
+echo "#!/bin/sh
 rm -rf /root/openVPN-udp/*
 
-cat /etc/openvpn/openvpn.log | grep "CLIENT_LIST,trialUser" | awk 'END{ print  "$SERVER_NICK_NAME Trial",NR }' >> /root/openVPN-udp/OpenVPNUsers.log
-cat /etc/openvpn/openvpn.log | grep "CLIENT_LIST,vpnuser" | awk 'END{ print  "$SERVER_NICK_NAME",NR }' >> /root/openVPN-udp/OpenVPNUsers.log
+cat /etc/openvpn/openvpn.log | grep "CLIENT_LIST,trialUser" | awk 'END{ print \"$SERVER_NICK_NAME Trial\",NR }' >> /root/openVPN-udp/OpenVPNUsers.log
+cat /etc/openvpn/openvpn.log | grep "CLIENT_LIST,vpnuser" | awk 'END{ print \"$SERVER_NICK_NAME\",NR }' >> /root/openVPN-udp/OpenVPNUsers.log
 
-cat /etc/openvpn/openvpn.log | grep "CLIENT_LIST,trialUser" | awk -F',' -v now=`date +%s` '{print "$SERVER_NICK_NAME Trial",$3,$6,$7,now-$9}' >> /root/openVPN/OpenVPN.log
-cat /etc/openvpn/openvpn.log | grep "CLIENT_LIST,vpnuser" | awk -F',' -v now=`date +%s` '{print "$SERVER_NICK_NAME",$3,$6,$7,now-$9}' >> /root/openVPN/OpenVPN.log
+cat /etc/openvpn/openvpn.log | grep "CLIENT_LIST,trialUser" | awk -F',' -v now=`date +%s` '{print \"$SERVER_NICK_NAME Trial\",$3,$6,$7,now-$9}' >> /root/openVPN/OpenVPN.log
+cat /etc/openvpn/openvpn.log | grep "CLIENT_LIST,vpnuser" | awk -F',' -v now=`date +%s` '{print \"$SERVER_NICK_NAME\",$3,$6,$7,now-$9}' >> /root/openVPN/OpenVPN.log
 
 /bin/curl -T /root/openVPN-udp/OpenVPNUsers.log http://listener.logz.io:8021/file_upload/ejNwBdrgIBaYdIxxOfigFcjfzlbnNoeD/OpenVPNConnectedUsers
-/bin/curl -T /root/openVPN-udp/OpenVPN.log http://listener.logz.io:8021/file_upload/ejNwBdrgIBaYdIxxOfigFcjfzlbnNoeD/OpenVPNStats' >> /root/uploader-udp.sh
+/bin/curl -T /root/openVPN-udp/OpenVPN.log http://listener.logz.io:8021/file_upload/ejNwBdrgIBaYdIxxOfigFcjfzlbnNoeD/OpenVPNStats" >> /root/uploader-udp.sh
 chmod +x /root/uploader-udp.sh
 
 echo '*/5  *  *  *  * root  /root/uploader.sh' >> /etc/crontab
