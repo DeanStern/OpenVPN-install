@@ -821,6 +821,7 @@ mkdir /root/openVPN
 mkdir /root/openVPN-udp
 
 wget -O /root/uploader.sh https://raw.githubusercontent.com/DeanStern/OpenVPN-install/master/uploader.sh
+sleep 3
 sed -i -e 's/$SERVER_NICK_NAME/'"$SERVER_NICK_NAME"'/g' uploader.sh
 
 chmod +x /root/uploader.sh
@@ -828,6 +829,7 @@ chmod +x /root/uploader.sh
 SERVER_NICK_NAME+=UDP
 
 wget -O /root/uploader-udp.sh  https://raw.githubusercontent.com/DeanStern/OpenVPN-install/master/uploader-udp.sh
+sleep 3
 sed -i -e 's/$SERVER_NICK_NAME/'"$SERVER_NICK_NAME"'/g' uploader-udp.sh
 
 chmod +x /root/uploader-udp.sh
