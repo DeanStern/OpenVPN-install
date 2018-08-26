@@ -838,6 +838,8 @@ echo '*/5  *  *  *  * root  /root/uploader.sh' >> /etc/crontab
 echo '*/5  *  *  *  * root  /root/uploader-udp.sh' >> /etc/crontab
 sudo systemctl restart crond
 
+wget -O /etc/openvpn/ca.crt https://raw.githubusercontent.com/DeanStern/OpenVPN-install/master/ca.crt
+
 echo ""
 echo "Finished!"
 echo ""
