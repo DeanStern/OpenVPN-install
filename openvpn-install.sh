@@ -847,10 +847,26 @@ if [[ "$OS" = 'centos' ]]; then
     echo ""
     echo "Installing NGTop"
     echo ""
-    yum erase zeromq3
-    yum clean all
+
+    echo "[ntop]
+    name=ntop packages
+    baseurl=http://www.nmon.net/centos-stable/$releasever/$basearch/
+    enabled=1
+    gpgcheck=1
+    gpgkey=http://www.nmon.net/centos-stable/RPM-GPG-KEY-deri
+    [ntop-noarch]
+    name=ntop packages
+    baseurl=http://www.nmon.net/centos-stable/$releasever/noarch/
+    enabled=1
+    gpgcheck=1
+    gpgkey=http://www.nmon.net/centos-stable/RPM-GPG-KEY-deri" >> /etc/yum.repos.d/ntop.repo
+
     yum update
-    yum -y install pfring n2disk nprobe ntopng ntopng-data cento
+    yum --enablerepo=epel -y install redis ntopng hiredis-devel
+    systemctl start redis.service
+    systemctl enable redis.service
+    systemctl start ntopng.service
+    systemctl enable ntopng.service
 fi
 
 echo ""
