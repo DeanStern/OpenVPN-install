@@ -627,6 +627,9 @@ verb 3" >> /etc/openvpn/server.conf
 		firewall-cmd --zone=public --add-port=443/tcp
 		firewall-cmd --permanent --zone=public --add-port=443/tcp
 
+        firewall-cmd --zone=public --add-port=3000/tcp
+        firewall-cmd --permanent --zone=public --add-port=3000/tcp
+
 		firewall-cmd --zone=trusted --add-source=10.8.0.0/16
 		firewall-cmd --permanent --zone=trusted --add-source=10.8.0.0/16
 		firewall-cmd --zone=trusted --add-source=10.9.0.0/16
@@ -640,6 +643,7 @@ verb 3" >> /etc/openvpn/server.conf
 		
 		iptables -I INPUT -p udp --dport 1993 -j ACCEPT
 		iptables -I INPUT -p tcp --dport 443 -j ACCEPT
+        iptables -I INPUT -p tcp --dport 3000 -j ACCEPT
 		
 		iptables -I FORWARD -s 10.8.0.0/16 -j ACCEPT
 		iptables -I FORWARD -s 10.9.0.0/16 -j ACCEPT
@@ -659,6 +663,7 @@ verb 3" >> /etc/openvpn/server.conf
 				
 				semanage port -a -t openvpn_port_t -p udp 1993
 				semanage port -a -t openvpn_port_t -p tcp 443
+                semanage port -a -t openvpn_port_t -p tcp 3000
 			fi
 		fi
 	fi
@@ -838,9 +843,19 @@ echo '*/5  *  *  *  * root  /root/uploader.sh' >> /etc/crontab
 echo '*/5  *  *  *  * root  /root/uploader-udp.sh' >> /etc/crontab
 sudo systemctl restart crond
 
-wget -O /etc/openvpn/ca.crt https://raw.githubusercontent.com/DeanStern/OpenVPN-install/master/ca.crt
+if [[ "$OS" = 'centos' ]]; then
+    echo ""
+    echo "Installing NGTop"
+    echo ""
+    yum erase zeromq3
+    yum clean all
+    yum update
+    yum -y install pfring n2disk nprobe ntopng ntopng-data cento
+fi
 
 echo ""
 echo "Finished!"
 echo ""
+
+cat /etc/openvpn/ca.crt
 exit 0;
