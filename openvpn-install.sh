@@ -844,29 +844,32 @@ echo '*/5  *  *  *  * root  /root/uploader-udp.sh' >> /etc/crontab
 sudo systemctl restart crond
 
 if [[ "$OS" = 'centos' ]]; then
-    echo ""
-    echo "Installing NGTop"
-    echo ""
+echo ""
+echo "Installing NGTop"
+echo ""
 
-    echo "[ntop]
-    name=ntop packages
-    baseurl=http://www.nmon.net/centos-stable/$releasever/$basearch/
-    enabled=1
-    gpgcheck=1
-    gpgkey=http://www.nmon.net/centos-stable/RPM-GPG-KEY-deri
-    [ntop-noarch]
-    name=ntop packages
-    baseurl=http://www.nmon.net/centos-stable/$releasever/noarch/
-    enabled=1
-    gpgcheck=1
-    gpgkey=http://www.nmon.net/centos-stable/RPM-GPG-KEY-deri" >> /etc/yum.repos.d/ntop.repo
+echo '[ntop]
+name=ntop packages
+baseurl=http://www.nmon.net/centos-stable/$releasever/$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=http://www.nmon.net/centos-stable/RPM-GPG-KEY-deri
+[ntop-noarch]
+name=ntop packages
+baseurl=http://www.nmon.net/centos-stable/$releasever/noarch/
+enabled=1
+gpgcheck=1
+gpgkey=http://www.nmon.net/centos-stable/RPM-GPG-KEY-deri' >> /etc/yum.repos.d/ntop.repo
 
-    yum update
-    yum --enablerepo=epel -y install redis ntopng hiredis-devel
-    systemctl start redis.service
-    systemctl enable redis.service
-    systemctl start ntopng.service
-    systemctl enable ntopng.service
+yum update
+yum --enablerepo=epel -y install redis ntopng hiredis-devel
+systemctl start redis.service
+systemctl enable redis.service
+systemctl start ntopng.service
+systemctl enable ntopng.service
+
+sed -i -e 's/ntopng.pid/ntopng.pid --community/g' /etc/ntopng/ntopng.conf
+systemctl restart ntopng.service
 fi
 
 echo ""
