@@ -621,8 +621,8 @@ verb 3" >> /etc/openvpn/server.conf
 		# We don't use --add-service=openvpn because that would only work with
 		# the default port. Using both permanent and not permanent rules to
 		# avoid a firewalld reload.
-		firewall-cmd --zone=public --add-port=1993/udp
-		firewall-cmd --permanent --zone=public --add-port=1993/udp
+		firewall-cmd --zone=public --add-port=1994/udp
+		firewall-cmd --permanent --zone=public --add-port=1994/udp
 
 		firewall-cmd --zone=public --add-port=443/tcp
 		firewall-cmd --permanent --zone=public --add-port=443/tcp
@@ -641,7 +641,7 @@ verb 3" >> /etc/openvpn/server.conf
 		# Not the best approach but I can't think of other and this shouldn't
 		# cause problems.
 		
-		iptables -I INPUT -p udp --dport 1993 -j ACCEPT
+		iptables -I INPUT -p udp --dport 1994 -j ACCEPT
 		iptables -I INPUT -p tcp --dport 443 -j ACCEPT
         iptables -I INPUT -p tcp --dport 3000 -j ACCEPT
 		
@@ -661,7 +661,7 @@ verb 3" >> /etc/openvpn/server.conf
 					yum install policycoreutils-python -y
 				fi
 				
-				semanage port -a -t openvpn_port_t -p udp 1993
+				semanage port -a -t openvpn_port_t -p udp 1994
 				semanage port -a -t openvpn_port_t -p tcp 443
                 semanage port -a -t openvpn_port_t -p tcp 3000
 			fi
