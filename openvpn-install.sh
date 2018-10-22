@@ -769,8 +769,9 @@ verify-client-cert none
 username-as-common-name
 duplicate-cn
 status-version 2
-tun-mtu 1400
-mssfix 1360" >> /etc/openvpn/server.conf
+tun-mtu 1500
+tun-mtu-extra 32
+mssfix 1450" >> /etc/openvpn/server.conf
 
 echo 'port 443
 proto tcp
@@ -799,8 +800,9 @@ verify-client-cert none
 username-as-common-name
 duplicate-cn
 status-version 2
-tun-mtu 1400
-mssfix 1360" >> /etc/openvpn/server-tcp.conf
+tun-mtu 1500
+tun-mtu-extra 32
+mssfix 1450" >> /etc/openvpn/server-tcp.conf
 
 echo ""
 echo "Creating users..."
