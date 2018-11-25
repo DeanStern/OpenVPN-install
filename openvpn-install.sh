@@ -752,8 +752,8 @@ keepalive 10 120
 topology subnet
 server 10.8.0.0 255.255.0.0
 ifconfig-pool-persist ipp.txt
-push "dhcp-option DNS 8.8.8.8"
-push "dhcp-option DNS 8.8.4.4"
+push "dhcp-option DNS 1.0.0.1"
+push "dhcp-option DNS 1.1.1.1"
 push "redirect-gateway def1 bypass-dhcp"
 ca ca.crt' >> /etc/openvpn/server.conf
 echo "cert $SERVER_NAME.crt
@@ -783,8 +783,8 @@ keepalive 10 120
 topology subnet
 server 10.9.0.0 255.255.0.0
 ifconfig-pool-persist ipp.txt
-push "dhcp-option DNS 8.8.8.8"
-push "dhcp-option DNS 8.8.4.4"
+push "dhcp-option DNS 1.0.0.1"
+push "dhcp-option DNS 1.1.1.1"
 push "redirect-gateway def1 bypass-dhcp"
 ca ca.crt' >> /etc/openvpn/server-tcp.conf
 echo "cert $SERVER_NAME.crt
@@ -841,38 +841,22 @@ sed -i -e 's/$SERVER_NICK_NAME/'"$SERVER_NICK_NAME"'/g' /root/uploader-udp.sh
 
 chmod +x /root/uploader-udp.sh
 
+echo ""
+echo "Preparing list script"
+echo ""
+wget -O /root/list.sh  https://raw.githubusercontent.com/DeanStern/OpenVPN-install/master/list.sh
+sleep 2
+
+yum install -y httpd
+systemctl start httpd
+systemctl enable httpd
+
+chmod +x /root/list.sh
+
 echo '*/5  *  *  *  * root  /root/uploader.sh' >> /etc/crontab
 echo '*/5  *  *  *  * root  /root/uploader-udp.sh' >> /etc/crontab
+echo '*/1  *  *  *  * root  /root/list.sh' >> /etc/crontab
 sudo systemctl restart crond
-
-if [[ "$OS" = 'centos' ]]; then
-echo ""
-echo "Installing NGTop"
-echo ""
-
-echo '[ntop]
-name=ntop packages
-baseurl=http://www.nmon.net/centos-stable/$releasever/$basearch/
-enabled=1
-gpgcheck=1
-gpgkey=http://www.nmon.net/centos-stable/RPM-GPG-KEY-deri
-[ntop-noarch]
-name=ntop packages
-baseurl=http://www.nmon.net/centos-stable/$releasever/noarch/
-enabled=1
-gpgcheck=1
-gpgkey=http://www.nmon.net/centos-stable/RPM-GPG-KEY-deri' >> /etc/yum.repos.d/ntop.repo
-
-yum update
-yum --enablerepo=epel -y install redis ntopng hiredis-devel
-systemctl start redis.service
-systemctl enable redis.service
-systemctl start ntopng.service
-systemctl enable ntopng.service
-
-sed -i -e 's/ntopng.pid/ntopng.pid --community/g' /etc/ntopng/ntopng.conf
-systemctl restart ntopng.service
-fi
 
 echo ""
 echo "Finished!"
