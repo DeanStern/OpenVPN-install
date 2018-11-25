@@ -627,8 +627,11 @@ verb 3" >> /etc/openvpn/server.conf
 		firewall-cmd --zone=public --add-port=443/tcp
 		firewall-cmd --permanent --zone=public --add-port=443/tcp
 
-        firewall-cmd --zone=public --add-port=3000/tcp
-        firewall-cmd --permanent --zone=public --add-port=3000/tcp
+		firewall-cmd --zone=public --add-port=80/tcp
+		firewall-cmd --permanent --zone=public --add-port=80/tcp
+		
+		firewall-cmd --zone=public --add-port=3000/tcp
+		firewall-cmd --permanent --zone=public --add-port=3000/tcp
 
 		firewall-cmd --zone=trusted --add-source=10.8.0.0/16
 		firewall-cmd --permanent --zone=trusted --add-source=10.8.0.0/16
@@ -643,7 +646,8 @@ verb 3" >> /etc/openvpn/server.conf
 		
 		iptables -I INPUT -p udp --dport 1194 -j ACCEPT
 		iptables -I INPUT -p tcp --dport 443 -j ACCEPT
-        iptables -I INPUT -p tcp --dport 3000 -j ACCEPT
+		iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+	        iptables -I INPUT -p tcp --dport 3000 -j ACCEPT
 		
 		iptables -I FORWARD -s 10.8.0.0/16 -j ACCEPT
 		iptables -I FORWARD -s 10.9.0.0/16 -j ACCEPT
